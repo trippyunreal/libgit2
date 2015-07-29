@@ -38,7 +38,7 @@ build_script:
     if "%GENERATOR%"=="MSYS Makefiles" (C:\MinGW\msys\1.0\bin\sh --login /c/projects/libgit2/script/appveyor-mingw.sh)
 test_script:
 - ps: |
-    java -jar poxyproxy.jar --port 8080 --credentials foo:bar
+    Start-Job { java -jar poxyproxy.jar --port 8080 --credentials foo:bar }
     ctest -V .
     set GITTEST_REMOTE_PROXY_URL http://foo:bar@localhost:8080/
     .\Debug\libgit2_clar.exe -sonline::clone::proxy_credentials_in_url

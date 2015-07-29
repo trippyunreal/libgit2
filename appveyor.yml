@@ -32,8 +32,15 @@ build_script:
     if ($env:GENERATOR -ne "MSYS Makefiles") {
       cmake -D ENABLE_TRACE=ON -D BUILD_CLAR=ON -D MSVC_CRTDBG=ON .. -G"$env:GENERATOR"
       cmake --build . --config Debug
+      Invoke-WebRequest https://github.com/ethomson/poxyproxy/releases/download/v0.1.0/poxyproxy-0.1.0.jar -OutFile poxyproxy.jar
     }
 - cmd: |
     if "%GENERATOR%"=="MSYS Makefiles" (C:\MinGW\msys\1.0\bin\sh --login /c/projects/libgit2/script/appveyor-mingw.sh)
 test_script:
-- ps: ctest -V .
+- ps: |
+    java -jar poxyproxy.jar --port 8080 --credentials foo:bar
+    ctest -V .
+    set GITTEST_REMOTE_PROXY_URL http://foo:bar@localhost:8080/
+    .\Debug\libgit2_clar.exe -sonline::clone::proxy_credentials_in_url
+    set GITTEST_REMOTE_PROXY_URL http://localhost:8080/
+    .\Debug\libgit2_clar.exe -sonline::clone::proxy_credentials_request

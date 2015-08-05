@@ -348,11 +348,12 @@ static int unpack_pkt(git_pkt **out, const char *line, size_t len)
 	return 0;
 }
 
-static int32_t parse_len(const char *line)
+static int32_t parse_len(const char *line, size_t bufflen)
 {
 	char num[PKT_LEN_SIZE + 1];
 	int i, k, error;
-	int32_t len;
+	int32_t len, error_payload_len;
+	char* error_payload;
 	const char *num_end;
 
 	memcpy(num, line, PKT_LEN_SIZE);
@@ -360,15 +361,24 @@ static int32_t parse_len(const char *line)
 
 	for (i = 0; i < PKT_LEN_SIZE; ++i) {
 		if (!isxdigit(num[i])) {
+			/* Make copy of error payload to make sure it is NUL-terminated */
+			error_payload_len = bufflen;
+			if(error_payload_len > 120) error_payload_len = 120;
+			error_payload = git__malloc(error_payload_len + 1);
+			GITERR_CHECK_ALLOC(error_payload);
+			memcpy(error_payload, line, error_payload_len);
+			error_payload[error_payload_len] = '\0';
+			
 			/* Make sure there are no special characters before passing to error message */
-			for (k = 0; k < PKT_LEN_SIZE; ++k) {
-				if(iscntrl(num[k])) {
+			for (k = 0; k < error_payload_len; ++k) {
+				if(iscntrl(error_payload[k])) {
 					/* Truncate at first control character */
 					num[k] = '\0';
 				}
 			}
 			
-			giterr_set(GITERR_NET, "Invalid digit in hex length: %s", num);
+			giterr_set(GITERR_NET, "Bad digit in hex length: %s", error_payload);
+			git__free(error_payload);
 			return -1;
 		}
 	}
@@ -402,7 +412,7 @@ int git_pkt_parse_line(
 	if (bufflen > 0 && bufflen < PKT_LEN_SIZE)
 		return GIT_EBUFS;
 
-	len = parse_len(line);
+	len = parse_len(line, bufflen);
 	if (len < 0) {
 		/*
 		 * If we fail to parse the length, it might be because the

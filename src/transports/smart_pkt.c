@@ -373,7 +373,7 @@ static int32_t parse_len(const char *line, size_t bufflen)
 			for (k = 0; k < error_payload_len; ++k) {
 				if(iscntrl(error_payload[k])) {
 					/* Truncate at first control character */
-					num[k] = '\0';
+					error_payload[k] = '\0';
 				}
 			}
 			

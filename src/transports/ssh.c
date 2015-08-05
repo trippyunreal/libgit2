@@ -57,12 +57,18 @@ static void ssh_error(LIBSSH2_SESSION *session, const char *errmsg)
  * Locate where in scp_url the path starts taking both port number and regular :
  * usage for scp into account.
  *
- * ':' is both used to delimit hostname:port and to indicate that remainder
+ * ':' is both used to delimit username:password, hostname:port and to indicate that remainder
  * of url relative path which makes it problmematic to both use relative paths and custom
  * port number.
  */
 static char* scp_path_start(char const* scp_url) 
 {
+	/* If there is any username we skip past this, as we do not want to be confused
+	   by : used to indicate password */
+	
+	char* at = strchr(scp_url, '@');
+	if(at) scp_url = at + 1;
+	
 	char* colon = strchr(scp_url, ':');
 	if(!colon) return NULL;
 
@@ -278,8 +284,6 @@ static int git_ssh_extract_url_parts(
 	colon = strchr(url, ':');
     path = scp_path_start(url);
     
-    fprintf(stderr, "url = %s, colon = %s, path = %s", url, colon, path);
-
 	at = strchr(url, '@');
 	if (at) {
 		start = at + 1;
@@ -301,7 +305,6 @@ static int git_ssh_extract_url_parts(
         //                         ^         ^
         //                     (colon+1)    path
         *port = git__substrdup(colon + 1, (path - 1) - (colon + 1));
-        fprintf(stderr, "port = %s", port);
         GITERR_CHECK_ALLOC(*port);
     } else {
         *port = NULL;

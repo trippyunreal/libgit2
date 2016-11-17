@@ -754,8 +754,8 @@ int git_path_resolve_relative(git_buf *path, size_t ceiling)
 				base = to;
 			} else {
 				/* back up a path segment */
-				while (to > base && to[-1] == '/') to--;
-				while (to > base && to[-1] != '/') to--;
+				while (to > base && (to[-1] == '/' || to[-1] == ':')) to--;
+				while (to > base && (to[-1] != '/' && to[-1] != ':')) to--;
 			}
 		} else {
 			if (*next == '/' && *from != '/')

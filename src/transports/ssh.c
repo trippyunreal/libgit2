@@ -55,33 +55,6 @@ static void ssh_error(LIBSSH2_SESSION *session, const char *errmsg)
 	giterr_set(GITERR_SSH, "%s: %s", errmsg, ssherr);
 }
 
-/* 
- * Locate where in scp_url the path starts taking both port number and regular :
- * usage for scp into account.
- *
- * ':' is both used to delimit hostname:port and to indicate that remainder
- * of url relative path which makes it problmematic to both use relative paths and custom
- * port number.
- */
-static char* scp_path_start(char const* scp_url) {
-    char* colon = strchr(scp_url, ':');
-    if(!colon) return NULL;
-    
-    // step through url to check if there is "[0-9]:" which we then skip past
-    char* ptr = colon + 1;
-    while(1) {
-        char c = *ptr;
-        
-        // we found second colon without non-digits in-between
-        if(c == ':') return ptr + 1;
-        
-        if(c >= '0' && c <= '9') ++ptr;
-        else {
-            return colon + 1;
-        }
-    }
-}
-
 /*
  * Create a git protocol request.
  *
@@ -105,7 +78,8 @@ static int gen_proto(git_buf *request, const char *cmd, const char *url)
 			goto done;
 		}
 	}
-	repo = scp_path_start(url);
+	repo = strchr(url, ':');
+	if (repo) repo++;
 
 done:
 	if (!repo) {
@@ -280,15 +254,14 @@ static int ssh_stream_alloc(
 
 static int git_ssh_extract_url_parts(
 	char **host,
-	char **port,
 	char **username,
 	const char *url)
 {
-	char *colon, *at, *path;
+	char *colon, *at;
 	const char *start;
 
 	colon = strchr(url, ':');
-	path = scp_path_start(url);
+
 
 	at = strchr(url, '@');
 	if (at) {
@@ -304,20 +277,6 @@ static int git_ssh_extract_url_parts(
 		giterr_set(GITERR_NET, "Malformed URL");
 		return -1;
 	}
-	
-	// colon is both used to delimit hostname and port number and to indicate that remainder
-	// of url is relative path and we allow two colon when only digits are in-between to allow
-	// setting both non-standard port and relative path.
-	if(colon + 1 < path) {
-		// extract port number in sitation where
-		//       username@hostname:123456789:directory/subdir/repo.git
-		//                         ^         ^
-		//                     (colon+1)    path
-		*port = git__substrdup(colon + 1, (path - 1) - (colon + 1));
-		GITERR_CHECK_ALLOC(*port);
-	 } else {
-		*port = NULL;
-	 }
 
 	*host = git__substrdup(start, colon - start);
 	GITERR_CHECK_ALLOC(*host);
@@ -575,13 +534,10 @@ static int _git_ssh_setup_conn(
 			goto post_extract;
 		}
 	}
-	if ((error = git_ssh_extract_url_parts(&host, &port, &user, url)) < 0)
+	if ((error = git_ssh_extract_url_parts(&host, &user, url)) < 0)
 		goto done;
-		
-	if(!port) {
-		port = git__strdup(default_port);
-		GITERR_CHECK_ALLOC(port);
-	}
+	port = git__strdup(default_port);
+	GITERR_CHECK_ALLOC(port);
 
 post_extract:
 	if ((error = git_socket_stream_new(&s->io, host, port)) < 0 ||

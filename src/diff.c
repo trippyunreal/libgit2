@@ -55,16 +55,34 @@ int git_diff__entry_cmp(const void *a, const void *b)
 {
 	const git_index_entry *entry_a = a;
 	const git_index_entry *entry_b = b;
-
-	return strcmp(entry_a->path, entry_b->path);
+    
+    extern const char* ios_normalized_path_copy(const char* path, size_t path_length);
+    char const* a_path = ios_normalized_path_copy(entry_a->path, 0);
+    char const* b_path = ios_normalized_path_copy(entry_b->path, 0);
+    
+	int result = strcmp(a_path, b_path);
+    
+    if(a_path != entry_a->path) free(a_path);
+    if(b_path != entry_b->path) free(b_path);
+    
+    return result;
 }
 
 int git_diff__entry_icmp(const void *a, const void *b)
 {
 	const git_index_entry *entry_a = a;
 	const git_index_entry *entry_b = b;
+    
+    extern const char* ios_normalized_path_copy(const char* path, size_t path_length);
+    char const* a_path = ios_normalized_path_copy(entry_a->path, 0);
+    char const* b_path = ios_normalized_path_copy(entry_b->path, 0);
 
-	return strcasecmp(entry_a->path, entry_b->path);
+	int result = strcasecmp(a_path, b_path);
+
+    if(a_path != entry_a->path) free(a_path);
+    if(b_path != entry_b->path) free(b_path);
+
+    return result;
 }
 
 void git_diff_free(git_diff *diff)

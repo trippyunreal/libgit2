@@ -1,13 +1,26 @@
-v0.26 + 1
+v0.26.2
+-------
+
+This is a security release fixing memory handling issues when reading crafted
+repository index files. The issues allow for possible denial of service due to
+allocation of large memory and out-of-bound reads.
+
+As the index is never transferred via the network, exploitation requires an
+attacker to have access to the local repository.
+
+v0.26.1
 ---------
 
-### Changes or improvements
+This is a security release fixing the following CVEs in the bundled zlib
+library:
 
-### API additions
+* CVE-2016-9843
+* CVE-2016-9841
+* CVE-2016-9842
+* CVE-2016-9840
 
-### API removals
-
-### Breaking API changes
+All users compiling libgit2 with the bundled zlib instead of using the
+system-provided zlib must upgrade.
 
 v0.26
 -----

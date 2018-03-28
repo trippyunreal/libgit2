@@ -677,12 +677,8 @@ int git_path_set_error(int errno_value, const char *path, const char *action)
 
 int git_path_lstat(const char *path, struct stat *st)
 {
-    extern const char* ios_normalized_path_copy(const char* path, size_t path_length);
-    char* normalized = ios_normalized_path_copy(path, 0);
-    int status = p_lstat(normalized, st);
-    if(normalized != path) free(normalized);
-    
-	if (status == 0) return 0;
+    if (p_lstat(path, st) == 0)
+        return 0;
 
 	return git_path_set_error(errno, path, "stat");
 }

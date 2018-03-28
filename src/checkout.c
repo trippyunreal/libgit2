@@ -323,19 +323,13 @@ static int checkout_action_no_wd(
 static int checkout_target_fullpath(
 	git_buf **out, checkout_data *data, const char *path)
 {
-	extern const char* ios_normalized_path_copy(const char* path, size_t path_length);
-	char* normalized = (char*)ios_normalized_path_copy(path, 0);
-	
 	git_buf_truncate(&data->target_path, data->target_len);
 
-	if (path && git_buf_puts(&data->target_path, normalized) < 0) {
-		if(normalized != path) free(normalized);
+    if (path && git_buf_puts(&data->target_path, path) < 0)
 		return -1;
-	}
 
 	*out = &data->target_path;
 
-	if(normalized != path) free(normalized);
 	return 0;
 }
 

@@ -312,7 +312,7 @@ void test_merge_trees_recursive__conflicting_merge_base(void)
 		{ 0100644, "4b7c5650008b2e747fe1809eeb5a1dde0e80850a", 0, "bouilli.txt" },
 		{ 0100644, "c4e6cca3ec6ae0148ed231f97257df8c311e015f", 0, "gravy.txt" },
 		{ 0100644, "68af1fc7407fd9addf1701a87eb1c95c7494c598", 0, "oyster.txt" },
-		{ 0100644, "a13c307108cd1ac9d10a23bd2e8072c298570592", 1, "veal.txt" },
+		{ 0100644, "cfc01b0976122eae42a82064440bbf534eddd7a0", 1, "veal.txt" },
 		{ 0100644, "d604c75019c282144bdbbf3fd3462ba74b240efc", 2, "veal.txt" },
 		{ 0100644, "37a5054a9f9b4628e3924c5cb8f2147c6e2a3efc", 3, "veal.txt" },
 	};
@@ -339,7 +339,7 @@ void test_merge_trees_recursive__conflicting_merge_base_with_diff3(void)
 		{ 0100644, "4b7c5650008b2e747fe1809eeb5a1dde0e80850a", 0, "bouilli.txt" },
 		{ 0100644, "c4e6cca3ec6ae0148ed231f97257df8c311e015f", 0, "gravy.txt" },
 		{ 0100644, "68af1fc7407fd9addf1701a87eb1c95c7494c598", 0, "oyster.txt" },
-		{ 0100644, "43b17b0ba58cbf2ffd3a048c1d4c7bbbcb0b987e", 1, "veal.txt" },
+		{ 0100644, "0b01d2f70a1c6b9ab60c382f3f9cdc8173da6736", 1, "veal.txt" },
 		{ 0100644, "37a5054a9f9b4628e3924c5cb8f2147c6e2a3efc", 2, "veal.txt" },
 		{ 0100644, "d604c75019c282144bdbbf3fd3462ba74b240efc", 3, "veal.txt" },
 	};
@@ -394,7 +394,7 @@ void test_merge_trees_recursive__recursionlimit(void)
 		{ 0100644, "4b7c5650008b2e747fe1809eeb5a1dde0e80850a", 0, "bouilli.txt" },
 		{ 0100644, "c4e6cca3ec6ae0148ed231f97257df8c311e015f", 0, "gravy.txt" },
 		{ 0100644, "68af1fc7407fd9addf1701a87eb1c95c7494c598", 0, "oyster.txt" },
-		{ 0100644, "59bdc2a0bfc74c6d4f911e04bab6aa081efe40d1", 1, "veal.txt" },
+		{ 0100644, "53217e8ac3f52bccf7603b8fff0ed0f4817f9bb7", 1, "veal.txt" },
 		{ 0100644, "898d12687fb35be271c27c795a6b32c8b51da79e", 2, "veal.txt" },
 		{ 0100644, "68a2e1ee61a23a4728fe6b35580fbbbf729df370", 3, "veal.txt" },
 	};
@@ -422,7 +422,7 @@ void test_merge_trees_recursive__merge_base_for_virtual_commit(void)
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "1bde1883de4977ea3e664b315da951d1f614c3b1", 0, "targetfile.txt" },
-		{ 0100644, "f66647f02d6779e119bd435fe2908867c64c265f", 1, "version.txt" },
+		{ 0100644, "b7de2b52ba055688061355fad1599a5d214ce8f8", 1, "version.txt" },
 		{ 0100644, "358efd6f589384fa8baf92234db9c7899a53916e", 2, "version.txt" },
 		{ 0100644, "a664873b1c0b9a1ed300f8644dde536fdaa3a34f", 3, "version.txt" },
 	};
@@ -445,7 +445,7 @@ void test_merge_trees_recursive__merge_base_for_virtual_commit_2(void)
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "4a06b258fed8a4d15967ec4253ae7366b70f727d", 0, "targetfile.txt" },
-		{ 0100644, "16c5a7810777e1181709833cfe6931949259f802", 1, "version.txt" },
+		{ 0100644, "b6bd0f9952f396e757d3f91e08c59a7e91707201", 1, "version.txt" },
 		{ 0100644, "f0856993e005c0d8ed2dc7cdc222cc1d89fb3c77", 2, "version.txt" },
 		{ 0100644, "2cba583804a4a6fad1baf97c959be447238d1489", 3, "version.txt" },
 	};

@@ -5,9 +5,9 @@
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
-#include <assert.h>
-
 #include "checkout.h"
+
+#include <assert.h>
 
 #include "git2/repository.h"
 #include "git2/refs.h"
@@ -70,6 +70,7 @@ typedef struct {
 	git_buf tmp;
 	unsigned int strategy;
 	int can_symlink;
+	int respect_filemode;
 	bool reload_submodules;
 	size_t total_steps;
 	size_t completed_steps;
@@ -159,17 +160,20 @@ GIT_INLINE(bool) is_workdir_base_or_new(
 		git_oid__cmp(&newitem->id, workdir_id) == 0);
 }
 
-GIT_INLINE(bool) is_file_mode_changed(git_filemode_t a, git_filemode_t b)
+GIT_INLINE(bool) is_filemode_changed(git_filemode_t a, git_filemode_t b, int respect_filemode)
 {
-#ifdef GIT_WIN32
-	/*
-	 * On Win32 we do not support the executable bit; the file will
-	 * always be 0100644 on disk, don't bother doing a test.
-	 */
-	return false;
-#else
-	return (S_ISREG(a) && S_ISREG(b) && a != b);
-#endif
+	/* If core.filemode = false, ignore links in the repository and executable bit changes */
+	if (!respect_filemode) {
+		if (a == S_IFLNK)
+			a = GIT_FILEMODE_BLOB;
+		if (b == S_IFLNK)
+			b = GIT_FILEMODE_BLOB;
+
+		a &= ~0111;
+		b &= ~0111;
+	}
+
+	return (a != b);
 }
 
 static bool checkout_is_workdir_modified(
@@ -217,11 +221,11 @@ static bool checkout_is_workdir_modified(
 	if (ie != NULL &&
 		git_index_time_eq(&wditem->mtime, &ie->mtime) &&
 		wditem->file_size == ie->file_size &&
-		!is_file_mode_changed(wditem->mode, ie->mode)) {
+		!is_filemode_changed(wditem->mode, ie->mode, data->respect_filemode)) {
 
 		/* The workdir is modified iff the index entry is modified */
 		return !is_workdir_base_or_new(&ie->id, baseitem, newitem) ||
-			is_file_mode_changed(baseitem->mode, ie->mode);
+			is_filemode_changed(baseitem->mode, ie->mode, data->respect_filemode);
 	}
 
 	/* depending on where base is coming from, we may or may not know
@@ -234,7 +238,7 @@ static bool checkout_is_workdir_modified(
 	if (S_ISDIR(wditem->mode))
 		return false;
 
-	if (is_file_mode_changed(baseitem->mode, wditem->mode))
+	if (is_filemode_changed(baseitem->mode, wditem->mode, data->respect_filemode))
 		return true;
 
 	if (git_diff__oid_for_entry(&oid, data->diff, wditem, wditem->mode, NULL) < 0)
@@ -325,7 +329,7 @@ static int checkout_target_fullpath(
 {
 	git_buf_truncate(&data->target_path, data->target_len);
 
-    if (path && git_buf_puts(&data->target_path, path) < 0)
+	if (path && git_buf_puts(&data->target_path, path) < 0)
 		return -1;
 
 	*out = &data->target_path;
@@ -1272,14 +1276,14 @@ static int checkout_verify_paths(
 	unsigned int flags = GIT_PATH_REJECT_WORKDIR_DEFAULTS;
 
 	if (action & CHECKOUT_ACTION__REMOVE) {
-		if (!git_path_isvalid(repo, delta->old_file.path, flags)) {
+		if (!git_path_isvalid(repo, delta->old_file.path, delta->old_file.mode, flags)) {
 			giterr_set(GITERR_CHECKOUT, "cannot remove invalid path '%s'", delta->old_file.path);
 			return -1;
 		}
 	}
 
 	if (action & ~CHECKOUT_ACTION__REMOVE) {
-		if (!git_path_isvalid(repo, delta->new_file.path, flags)) {
+		if (!git_path_isvalid(repo, delta->new_file.path, delta->new_file.mode, flags)) {
 			giterr_set(GITERR_CHECKOUT, "cannot checkout to invalid path '%s'", delta->new_file.path);
 			return -1;
 		}
@@ -2028,8 +2032,11 @@ static int checkout_write_entry(
 		(error = checkout_safe_for_update_only(data, fullpath->ptr, side->mode)) <= 0)
 		return error;
 
-	return checkout_write_content(data,
-		&side->id, fullpath->ptr, hint_path, side->mode, &st);
+	if (!S_ISGITLINK(side->mode))
+		return checkout_write_content(data,
+					      &side->id, fullpath->ptr, hint_path, side->mode, &st);
+
+	return 0;
 }
 
 static int checkout_write_entries(
@@ -2449,6 +2456,10 @@ static int checkout_data_init(
 
 	if ((error = git_repository__cvar(
 			 &data->can_symlink, repo, GIT_CVAR_SYMLINKS)) < 0)
+		goto cleanup;
+
+	if ((error = git_repository__cvar(
+			 &data->respect_filemode, repo, GIT_CVAR_FILEMODE)) < 0)
 		goto cleanup;
 
 	if (!data->opts.baseline && !data->opts.baseline_index) {

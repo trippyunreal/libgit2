@@ -44,7 +44,7 @@ void test_merge_workdir_recursive__writes_conflict_with_virtual_base(void)
 	cl_git_pass(git_futils_readbuffer(&conflicting_buf, "merge-recursive/veal.txt"));
 
 	cl_assert_equal_s(CONFLICTING_RECURSIVE_F1_TO_F2, conflicting_buf.ptr);
-	
+
 	git_index_free(index);
 	git_buf_free(&conflicting_buf);
 }
@@ -62,7 +62,7 @@ void test_merge_workdir_recursive__conflicting_merge_base_with_diff3(void)
 		{ 0100644, "4b7c5650008b2e747fe1809eeb5a1dde0e80850a", 0, "bouilli.txt" },
 		{ 0100644, "c4e6cca3ec6ae0148ed231f97257df8c311e015f", 0, "gravy.txt" },
 		{ 0100644, "68af1fc7407fd9addf1701a87eb1c95c7494c598", 0, "oyster.txt" },
-		{ 0100644, "43b17b0ba58cbf2ffd3a048c1d4c7bbbcb0b987e", 1, "veal.txt" },
+		{ 0100644, "0b01d2f70a1c6b9ab60c382f3f9cdc8173da6736", 1, "veal.txt" },
 		{ 0100644, "37a5054a9f9b4628e3924c5cb8f2147c6e2a3efc", 2, "veal.txt" },
 		{ 0100644, "d604c75019c282144bdbbf3fd3462ba74b240efc", 3, "veal.txt" },
 	};

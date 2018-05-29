@@ -1,6 +1,14 @@
+/*
+ * Copyright (C) the libgit2 contributors. All rights reserved.
+ *
+ * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * a Linking Exception. For full terms see the included COPYING file.
+ */
+
+#include "ignore.h"
+
 #include "git2/ignore.h"
 #include "common.h"
-#include "ignore.h"
 #include "attrcache.h"
 #include "path.h"
 #include "config.h"
@@ -532,6 +540,7 @@ int git_ignore_path_is_ignored(
 	git_ignores ignores;
 	unsigned int i;
 	git_attr_file *file;
+	git_dir_flag dir_flag = GIT_DIR_FLAG_UNKNOWN;
 
 	assert(repo && ignored && pathname);
 
@@ -540,7 +549,10 @@ int git_ignore_path_is_ignored(
 	memset(&path, 0, sizeof(path));
 	memset(&ignores, 0, sizeof(ignores));
 
-	if ((error = git_attr_path__init(&path, pathname, workdir, GIT_DIR_FLAG_UNKNOWN)) < 0 ||
+	if (git_repository_is_bare(repo))
+		dir_flag = GIT_DIR_FLAG_FALSE;
+
+	if ((error = git_attr_path__init(&path, pathname, workdir, dir_flag)) < 0 ||
 		(error = git_ignore__for_path(repo, path.path, &ignores)) < 0)
 		goto cleanup;
 

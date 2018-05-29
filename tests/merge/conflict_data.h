@@ -76,13 +76,13 @@
 	"<<<<<<< HEAD\n" \
 	"Put Into A Pot Three Quarts of Water, Three Onions Cut Small, One\n" \
 	"||||||| merged common ancestors\n" \
-	"<<<<<<< Temporary merge branch 1\n" \
+	"<<<<<<<<< Temporary merge branch 1\n" \
 	"PUT INTO A POT three quarts of water, three onions cut small, one\n" \
-	"||||||| merged common ancestors\n" \
+	"||||||||| merged common ancestors\n" \
 	"Put into a pot three quarts of water, three onions cut small, one\n" \
-	"=======\n" \
+	"=========\n" \
 	"Put into a pot three quarts of water, THREE ONIONS CUT SMALL, one\n" \
-	">>>>>>> Temporary merge branch 2\n" \
+	">>>>>>>>> Temporary merge branch 2\n" \
 	"=======\n" \
 	"put into a pot three quarts of water, three onions cut small, one\n" \
 	">>>>>>> branchH-1\n" \
